@@ -70,6 +70,24 @@ const run = async (sql, db) => {
     })
  }
 
+ // Get following users
+app.get('/api/v1/users/:id/following', (req, res) => {
+    // Connect database
+    const db = new sqlite3.Database(dbPath)
+    const id = req.params.id
+
+    // エラーの場合はerrを返し、rowsの場合は結果を返す
+    db.all(`SELECT * FROM following LEFT JOIN users ON following.followed_id = users.id WHERE following_id = ${id};`, (err, rows) => {
+        if (!rows) {
+            res.status(404).send({error: "Not Found!"})
+        } else {
+            res.status(200).json(rows)
+        }
+    })
+
+    db.close()
+})
+
 // Create a new user
 app.post('/api/v1/users', async (req, res) => {
     if (!req.body.name || req.body.name === "") {
